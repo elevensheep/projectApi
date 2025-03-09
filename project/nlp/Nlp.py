@@ -69,7 +69,7 @@ class Nlp:
         
         # 단어 목록이 없으면 모델의 단어 중 일부 선택
         if word_list is None:
-            word_list = self.model.wv.index_to_key[:200]  # 상위 20개 단어 사용
+            word_list = self.model.wv.index_to_key[:1000]
         
         word_vectors = [self.model.wv[word] for word in word_list if word in self.model.wv]
 
