@@ -48,18 +48,19 @@ class Nlp:
             print(f"⚠️ '{word1}' 또는 '{word2}'가 모델에 없습니다.")
     
     def SimilerWord(self, word):
-        """특정 단어와 가장 유사한 단어 출력"""
+        """특정 단어와 가장 유사한 단어 반환"""
         if self.model is None:
             print("⚠️ 모델이 로드되지 않았습니다. 먼저 CreateModel을 실행하세요.")
-            return
-        
+            return []
+
         if word in self.model.wv:
-            similar_words = self.model.wv.most_similar(word, topn=5)
-            print(f"🔵 '{word}'와(과) 가장 유사한 단어:")
-            for similar_word, score in similar_words:
-                print(f"  - {similar_word}: {score:.4f}")
+            similar_words = self.model.wv.most_similar(word, topn=10)
+            result = [(similar_word, score) for similar_word, score in similar_words]  # ✅ 결과 저장
+            return result  # ✅ 결과 반환
         else:
             print(f"⚠️ '{word}'가 모델에 없습니다.")
+            return []
+
     
     def VisualizeModel(self, word_list=None):
         """Word2Vec 모델의 단어 벡터를 2D로 시각화"""
