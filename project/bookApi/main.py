@@ -1,29 +1,27 @@
+import os
+import pandas as pd
 from NaverApi import NaverApi
 
 if __name__ == "__main__":
-    # Naver API 클라이언트 ID와 클라이언트 비밀키를 입력하세요.
+    # Naver API 클라이언트 ID와 클라이언트 비밀키 입력
     client_id = "i2i3NNXvdhGVpvoWNA3n"
     client_secret = "h2vJ3qku6Y"
-
+    
+    querys = [
+        "소설", "시/에세이", "인문", "요리", "건강",
+        "취미/실용/스포츠", "경제/경영", "자기계발",
+        "정치/사회", "역사/문화", "예술/대중문화",
+        "기술/공학", "외국어", "과학", "여행", "컴퓨터/IT"
+    ]
+    
     # NaverApi 클래스 인스턴스 생성
     api = NaverApi(client_id, client_secret)
+    all_books = api.KeywordExtraction(querys=querys)
 
-    # 특정 카테고리(예: "소설")에 대한 책 정보를 가져오기
-    print("소설 카테고리의 책 정보를 가져오는 중...")
-    novel_books = api.request_api(query="소설")
-    
-    if novel_books and "items" in novel_books:
-        print(f"소설 카테고리에서 {len(novel_books['items'])}권의 책을 찾았습니다.")
-        for book in novel_books["items"][:5]:  # 상위 5개 책만 출력
-            print(f"- 제목: {book['title']}, 저자: {book['author']}")
-    else:
-        print("소설 카테고리의 책 정보를 찾을 수 없습니다.")
+    # Convert to DataFrame
+    df = pd.DataFrame(all_books)
 
-    # 모든 카테고리에 대한 책 정보 가져오기
-    print("\n모든 카테고리의 책 정보를 가져오는 중...")
-    all_books = api.fetch_books_by_category()
+    # Save the DataFrame to a CSV file
+    df.to_csv('project/datafile/books_data.csv', index=False, encoding="utf-8")
 
-    for category, books in all_books.items():
-        print(f"\n[{category}] 카테고리에서 {len(books)}권의 책을 찾았습니다.")
-        for book in books[:3]:  # 각 카테고리에서 상위 3개 책만 출력
-            print(f"- 제목: {book['title']}, 저자: {book['author']}")
+    print(f"CSV 파일이 성공적으로 저장되었습니다: {'../datafile/books_data'}")
