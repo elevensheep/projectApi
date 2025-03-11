@@ -54,7 +54,7 @@ class Nlp:
             return []
 
         if word in self.model.wv:
-            similar_words = self.model.wv.most_similar(word, topn=10)
+            similar_words = self.model.wv.most_similar(word, topn=3)
             result = [(similar_word, score) for similar_word, score in similar_words]  # ✅ 결과 저장
             return result  # ✅ 결과 반환
         else:

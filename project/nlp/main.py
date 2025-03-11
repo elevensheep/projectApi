@@ -11,6 +11,7 @@ if __name__ == "__main__":
 
     # nlp.CreateModel(querys)
 
+
     # ✅ CSV 파일 읽기
     words = pd.read_csv("project/datafile/news_data.csv", encoding="utf-8-sig")
 
@@ -22,10 +23,12 @@ if __name__ == "__main__":
     nlp = Nlp()
 
     # ✅ `SimilerWord` 실행 및 저장
-    similer_words = [nlp.SimilerWord(x) for x in words[words_column_name]]
+    similer_words_dict = {word: nlp.SimilerWord(word) for word in words[words_column_name]}
 
-    # ✅ 최종 결과 출력
-    print("🔵 유사한 단어 리스트:", similer_words)
+    # ✅ 최종 결과 출력 (단어별 유사 단어 리스트)
+    print("\n🔵 유사한 단어 리스트:")
+    for word, similer_word_list in similer_words_dict.items():
+        print(f"🔹 {word} → {similer_word_list}")
 
     # # 단어 벡터 시각화
     # nlp.VisualizeModel()
