@@ -2,7 +2,7 @@ import sys
 import os
 from collections import Counter  
 import pandas as pd
-from datetime import datetime
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../nlp")))
 

@@ -16,16 +16,15 @@ class Nlp:
             self.model = Word2Vec.load(self.model_path)
     
     def KonlpyOkt(self, querys):
-            """문장에서 명사만 추출하여 리스트로 반환 (숫자 예외 처리)"""
-            result = []
-            for query in querys:
-                if isinstance(query, str):  # ✅ 문자열만 처리
-                    nouns = self.okt.nouns(query)
-                    filtered_noun = [word for word in nouns if len(word) > 1]  # 한 글자 제거
-                    result.append(filtered_noun)
-                else:
-                    result.append([])  # ✅ 숫자(float) 등은 빈 리스트로 처리
-            return result  
+        """문장에서 명사만 추출하여 하나의 리스트로 반환 (한 글자 단어 제거)"""
+        result = []
+        for query in querys:
+            if isinstance(query, str):
+                nouns = self.okt.nouns(query)
+                filtered_noun = [word for word in nouns if len(word) > 1]
+                if filtered_noun:
+                    result.extend(filtered_noun)
+        return result
     
     def CreateModel(self, querys):
         """Word2Vec 모델 학습 후 저장"""
