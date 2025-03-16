@@ -28,11 +28,20 @@ class Nlp:
     
     def CreateModel(self, querys):
         """Word2Vec 모델 학습 후 저장"""
-        words = self.KonlpyOkt(querys)  # 명사 리스트의 리스트 생성
-        model = Word2Vec(words, vector_size=100, window=3, min_count=1, workers=4, sg=0)
+        sentences = []
+        for query in querys:
+            if isinstance(query, str):
+                # 각 query를 리스트로 감싸서 KonlpyOkt에 전달하면, 해당 문장에 대한 토큰 리스트를 얻을 수 있음
+                tokens = self.KonlpyOkt([query])
+                if tokens:  # 토큰이 존재할 경우에만 추가
+                    sentences.append(tokens)
+                    
+        # sentences는 이제 각 문장의 토큰 리스트가 담긴 리스트임
+        model = Word2Vec(sentences, vector_size=100, window=3, min_count=1, workers=4, sg=0)
         model.save(self.model_path)
         self.model = model  # 모델 업데이트
         print("✅ Word2Vec 모델이 성공적으로 학습되었습니다.")
+
     
     def ModelScore(self, word1, word2):
         """두 단어 간 유사도 계산"""

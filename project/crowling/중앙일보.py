@@ -71,9 +71,9 @@ if __name__ == "__main__":
         # 상위 10개 단어 추출
         word_counts = Counter(all_nouns)
         top_10_words = [word for word, _ in word_counts.most_common(10)]
-
+        query = "INSERT INTO tb_news_Keyword (news_date, news_keyword) VALUES (%s, %s)"
         # 상위 10개 키워드를 DB에 저장 (현재 datetime 포함)
-        db.insert_top_keywords(section, top_10_words)
+        db.insert_top_keywords(section, top_10_words, query=query)
 
         print(f"\n🟢 스크래핑한 전체 단어 리스트 ({section.upper()}):")
         print(all_nouns)
@@ -82,7 +82,8 @@ if __name__ == "__main__":
             print(word)
 
     # DB에 저장된 키워드와 날짜 조회
-    fetched_data = db.fetch_keywords()
+    query = "SELECT news_date, news_keyword FROM tb_news_keyword"
+    fetched_data = db.fetch_keywords(query=query)
     print("\n📌 DB에서 가져온 키워드 및 날짜:")
     for news_date, keyword in fetched_data:
         print(f"{news_date} - {keyword}")

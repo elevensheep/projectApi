@@ -22,13 +22,13 @@ class MySQLDatabase:
             self.conn = None  # 연결 실패 시 None 설정
             self.cursor = None
 
-    def insert_top_keywords(self, section, keywords):
+    def insert_top_keywords(self, section, keywords, query):
         """상위 10개 단어와 현재 datetime을 tb_newsKeyword 테이블에 저장"""
         if not self.conn or not self.cursor:
             print("❌ 데이터베이스 연결 실패. insert_top_keywords 실행 불가.")
             return
         
-        query = "INSERT INTO tb_news_Keyword (news_date, news_keyword) VALUES (%s, %s)"
+        query = query
         now = datetime.now()  # 현재 datetime
         data = [(now, word) for word in keywords]
 
@@ -39,13 +39,13 @@ class MySQLDatabase:
         except mysql.connector.Error as err:
             print(f"❌ 데이터 저장 실패: {err}")
 
-    def fetch_keywords(self):
+    def fetch_keywords(self,query):
         """tb_newsKeyword 테이블에서 news_date와 news_keyword를 함께 조회"""
         if not self.conn or not self.cursor:
             print("❌ 데이터베이스 연결 실패. fetch_keywords 실행 불가.")
             return []
 
-        query = "SELECT news_date, news_keyword FROM tb_news_keyword"
+        self.query = query
         try:
             self.cursor.execute(query)
             result = self.cursor.fetchall()  # 각 row: (news_date, news_keyword)
