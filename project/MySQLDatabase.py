@@ -64,6 +64,20 @@ class MySQLDatabase:
             print(f"❌ 데이터 조회 실패: {err}")
             return []
         
+    def execute_query(self, query):
+        if not self.conn or not self.cursor:
+            print("❌ 데이터베이스 연결 실패. execute_query 실행 불가.")
+            return False
+
+        try:
+            self.cursor.execute(query)
+            self.conn.commit()  # 변경 사항 적용
+            print("✅ 쿼리 실행 성공")
+            return True
+        except mysql.connector.Error as err:
+            print(f"❌ 쿼리 실행 실패: {err}")
+            return False
+        
     def insert_books_keywords(self, isbn_tokens):
         """
         각 책의 ISBN과 그에 해당하는 토큰들을 tb_books_keyword 테이블에 삽입합니다.
@@ -141,7 +155,10 @@ class MySQLDatabase:
         
         return result
 
-    
+    def truncateBooksKeyword(self):
+        query = "TRUNCATE TABLE tb_books_keyword"
+        self.execute_query(query)
+        
     def insert_recommendations(self, mapping_data):
         """
         매핑된 데이터를 tb_recommend 테이블에 삽입합니다.
