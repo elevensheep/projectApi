@@ -31,3 +31,6 @@ if __name__ == "__main__":
     db.insert_recommendations(mapping_data=mappingData)
     
     db.close()
+    
+    nlp.LoadModel()
+    nlp. VisualizeModel()

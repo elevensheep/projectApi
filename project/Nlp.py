@@ -2,9 +2,14 @@ import os
 from konlpy.tag import Kkma
 from gensim.models import Word2Vec
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 import pandas as pd
 from MySQLDatabase import MySQLDatabase
+from sklearn.decomposition import PCA
+import numpy as np
+from sklearn.cluster import KMeans
+import platform
+from matplotlib.patches import Patch
 
 class Nlp:
     
@@ -115,45 +120,93 @@ class Nlp:
 
         return similar_news_data  # ✅ section별 유사 키워드 반환
 
-    def VisualizeModel(self, word_list=None):
-        """Word2Vec 모델의 단어 벡터를 2D로 시각화"""
-        
+    def LoadModel(self):
+        if not os.path.exists(self.model_path):
+            print(f"❌ 모델 파일을 찾을 수 없습니다: {self.model_path}")
+            return
+
+        try:
+            self.model = Word2Vec.load(self.model_path)
+            print("📦 Word2Vec 모델이 성공적으로 로드되었습니다.")
+        except Exception as e:
+            print("🚨 모델 로딩 중 오류가 발생했습니다:", e)
+                
+    def VisualizeModel(self, word_list=None, num_clusters=12):
+        """Word2Vec 모델의 단어 벡터를 2D로 시각화 (t-SNE + KMeans + 대표 키워드 + 범례)"""
+
         if self.model is None:
             print("⚠️ 모델이 로드되지 않았습니다. 먼저 CreateModel을 실행하세요.")
             return
-        
-        # 단어 목록이 없으면 모델에서 상위 1000개 단어 선택
+
+        # 단어 리스트 선택
         if word_list is None:
             word_list = self.model.wv.index_to_key[:1000]
-        
-        # 모델에 존재하는 단어만 필터링
+
+        # 벡터 추출
         word_list = [word for word in word_list if word in self.model.wv]
         word_vectors = np.array([self.model.wv[word] for word in word_list])
 
-        # PCA로 2차원 축소
-        pca = PCA(n_components=2)
-        reduced_vectors = pca.fit_transform(word_vectors)
-        
-        # 한글 폰트 설정 (OS에 맞게 자동 적용)
-        import platform
+        # PCA로 축소 후 t-SNE
+        pca = PCA(n_components=50)
+        word_vectors_pca = pca.fit_transform(word_vectors)
+
+        tsne = TSNE(
+            n_components=2,
+            perplexity=10,
+            learning_rate=100,
+            n_iter=1500,
+            random_state=42,
+            init='pca'
+        )
+        reduced_vectors = tsne.fit_transform(word_vectors_pca)
+
+        # KMeans 군집화
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        labels = kmeans.fit_predict(reduced_vectors)
+        centers = kmeans.cluster_centers_
+
+        # 각 군집의 대표 키워드 선정 (군집 중심에 가장 가까운 단어)
+        cluster_keywords = {}
+        for i in range(num_clusters):
+            indices = np.where(labels == i)[0]
+            if len(indices) == 0:
+                continue
+            cluster_vecs = reduced_vectors[indices]
+            center = centers[i]
+            distances = np.linalg.norm(cluster_vecs - center, axis=1)
+            closest_idx = indices[np.argmin(distances)]
+            cluster_keywords[i] = (word_list[closest_idx], center)
+
+        # 한글 폰트 설정
         if platform.system() == "Windows":
             plt.rcParams['font.family'] = 'Malgun Gothic'
         else:
             plt.rcParams['font.family'] = 'Nanum Gothic'
-        
+
         # 색상 설정
-        colors = plt.cm.viridis(np.linspace(0, 1, len(word_list)))
+        color_map = plt.cm.tab10(np.linspace(0, 1, num_clusters))
+        point_colors = [color_map[label] for label in labels]
 
         # 시각화
-        plt.figure(figsize=(20, 15))
-        plt.scatter(reduced_vectors[:, 0], reduced_vectors[:, 1], c=colors, alpha=0.7, edgecolors="k")
+        plt.figure(figsize=(22, 15))
+        plt.scatter(reduced_vectors[:, 0], reduced_vectors[:, 1], c=point_colors, alpha=0.6, edgecolors="k")
 
+        # 각 단어 라벨
         for i, word in enumerate(word_list):
-            plt.annotate(word, (reduced_vectors[i, 0] + 0.1, reduced_vectors[i, 1] + 0.1), fontsize=12)
+            plt.annotate(word, (reduced_vectors[i, 0] + 0.3, reduced_vectors[i, 1] + 0.3), fontsize=10, alpha=0.6)
 
-        plt.title("Word2Vec 단어 벡터 시각화 (PCA)", fontsize=16)
-        plt.xlabel("PC1", fontsize=14)
-        plt.ylabel("PC2", fontsize=14)
+        # 키워드 표시
+        legend_elements = []
+        for cluster_idx, (keyword, center) in cluster_keywords.items():
+            legend_elements.append(Patch(facecolor=color_map[cluster_idx], label=f"{keyword}"))
+
+        # 왼쪽 상단에 범례 추가
+        plt.legend(handles=legend_elements, title="📌 군집 대표 키워드", loc="upper left", bbox_to_anchor=(-0.1, 1.03),
+                fontsize=12, title_fontsize=13)
+
+        plt.title("Word2Vec 단어 벡터 군집 시각화 (t-SNE + KMeans)", fontsize=18)
+        plt.xlabel("t-SNE-1", fontsize=14)
+        plt.ylabel("t-SNE-2", fontsize=14)
         plt.grid(True)
-        
+        plt.tight_layout()
         plt.show()
