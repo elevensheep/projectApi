@@ -1,0 +1,10 @@
+a {
+    color: black;      /* 글씨 색을 검정으로 */
+    text-decoration: none; /* 밑줄 제거 */
+    font-weight: bold; /* 글씨 굵게 */
+}
+
+.App {
+    width: 1440px;
+    margin: 0 auto;
+}
