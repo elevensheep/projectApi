@@ -1,24 +1,40 @@
-import React from 'react';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const styles = {
-    wrapper: {
-        width: "150px",
-        height: "200px",
-        borderRadius: "8px"
+    link: {
+        width: "100%",
+        height: "100%",
+        display: "block",  // 크기 조정이 가능하도록 설정
+        textDecoration: "none",
+    },
+    container: {
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        overflow: "hidden",
     },
     img: {
-        width: "150px",
-        height: "200px",
-        borderRadius: "8px",
-        objectFit : "contain"
+        width: "100%",
+        height: "75%",
+        objectFit: "contain",
+    },
+    text: {
+        margin: "10px 0",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        textAlign: "center",
     },
 };
 
-const Book = (props) => {
+const Book = ({ bookIsbn, bookImg, bookAlt, bookTitle, styles: customStyles }) => {
     return (
-        <div style={styles.wrapper}>
-            <img src={props.bookImg} alt={props.bookAlt} style={styles.img}/>
-            <p dangerouslySetInnerHTML={{ __html: props.bookTitle }}></p>
+        <div style={{ ...styles.container, ...customStyles }}>
+            <img src={bookImg} alt={bookAlt || "Book Image"} style={styles.img} />
+            <h3 style={styles.text}>{bookTitle}</h3>
         </div>
     );
 };

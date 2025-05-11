@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Icons from "./Component/Icons";
 import Economy from "./image/economy.png";
@@ -14,6 +14,7 @@ const styles = {
         flexDirection: "column",
         gap: "20px",
         alignItems: "center",
+        maxHeight: "2500px",
     },
     icons: {
         display: "flex",
@@ -32,52 +33,52 @@ const iconData = [
 ];
 
 const RecommendPage = () => {
+    const navigate = useNavigate();
     const [selected, setSelected] = useState(null);
 
-    const handleClick = (index) => {
+    const handleClick = (index, link) => {
         setSelected(selected === index ? null : index);
+        navigate(`/recommend/${link}`);
     };
 
     return (
         <div style={styles.wrapper}>
             <h1>추천 도서</h1>
             <div style={styles.icons}>
-                {iconData.map(({ link, icon, text }, index) => (
-                    <motion.div
-                        key={index}
-                        layout
-                        transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                        }}
-                        style={{
-                            width: selected === index ? "500px" : "250px",
-                            height: "250px",
-                            cursor: "pointer",
-                            overflow: "hidden",
-                            borderRadius: "12px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }}
-                        onClick={() => handleClick(index)}
-                    >
-                        <Icons
-                            link={`/recommend/${link}`}
-                            icon={icon}
-                            text={text}
-                            width={selected === index ? "500px" : "250px"}
-                            height={"250px"}
-                        />
-                    </motion.div>
-                ))}
+                {iconData.map(({ link, icon, text }, index) => {
+                    const isSelected = selected === index;
+                    const width = isSelected ? "500px" : selected !== null ? "200px" : "250px";
+                    const transition = {
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                    };
+
+                    return (
+                        <motion.div
+                            key={index}
+                            layout
+                            transition={transition}
+                            style={{
+                                width,
+                                height: "250px",
+                                cursor: "pointer",
+                                overflow: "hidden",
+                                borderRadius: "12px",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                            onClick={() => handleClick(index, link)}
+                        >
+                            <Icons link={link} icon={icon} text={text} width={width} height={"250px"} />
+                        </motion.div>
+                    );
+                })}
             </div>
 
-            {/* Outlet을 사용하여 RecommendBookList를 렌더링 */}
-            <div style={{ marginTop: "20px", width: "100%" }}>
-                <Outlet />
-            </div>
+            {/* 하위 경로에 맞춰서 Outlet이 렌더링됨 */}
+            <Outlet />
         </div>
     );
 };

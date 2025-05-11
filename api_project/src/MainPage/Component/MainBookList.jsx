@@ -1,20 +1,31 @@
 import React, { useRef } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import Book from "../../Component/Book.jsx";
+import books from "../../Component/BookDump.jsx";
+import { Link } from "react-router-dom";
 
 const styles = {
     wrapper: {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        overflow: "hidden",
+        overflow: "hidden",  // 전체적으로 스크롤바를 완전히 숨김
         paddingBottom: "10px",
-        width: "1440px",
+        width: "100%",
+        maxWidth: "1440px",
+        margin: "0 auto",
         position: "relative",
+    },
+    bookContainer: {
+        width: "150px", // 너비 조정
+        cursor: "pointer",
+        transition: "width 0.3s ease",
+        flexShrink: 0,  // 책들이 줄어들지 않도록 설정
     },
     scrollContainer: {
         display: "flex",
         gap: "20px",
+        overflow: "hidden",  // X, Y축 모두 스크롤바 제거
     },
     button: {
         position: "absolute",
@@ -37,101 +48,20 @@ const styles = {
     },
     title: {
         textAlign: "left",
-        padding : "0px 0px 20px 5px",
-        margin: "0",
-    }
+        padding: "0px 0px 0px 5px",
+        margin: "0 5px",
+    },
 };
 
-const books = [
-    {
-        title: "소년이로 (편혜영 소설집)",
-        img: "https://shopping-phinf.pstatic.net/main_3243615/32436154262.20221019142158.jpg",
-        styles: { backgroundColor: "#222" },
-        isbn: "9788932035338",
-    },
-    {
-        title: "82년생 김지영",
-        img: "https://shopping-phinf.pstatic.net/main_3246707/32467074651.20231003084626.jpg?type=w300",
-        styles: { backgroundColor: "#333" },
-        isbn: "9788937473135",
-    },
-    {
-        title: "작별하지 않는다",
-        img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
-        styles: { backgroundColor: "#444" },
-        isbn: "9788954682152",
-    },
-    {
-        title: "소년이로 (편혜영 소설집)",
-        img: "https://shopping-phinf.pstatic.net/main_3243615/32436154262.20221019142158.jpg",
-        styles: { backgroundColor: "#222" },
-        isbn: "9788932035338",
-    },
-    {
-        title: "82년생 김지영",
-        img: "https://shopping-phinf.pstatic.net/main_3246707/32467074651.20231003084626.jpg?type=w300",
-        styles: { backgroundColor: "#333" },
-        isbn: "9788937473135",
-    },
-    {
-        title: "작별하지 않는다",
-        img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
-        styles: { backgroundColor: "#444" },
-        isbn: "9788954682152",
-    },
-        {
-        title: "소년이로 (편혜영 소설집)",
-        img: "https://shopping-phinf.pstatic.net/main_3243615/32436154262.20221019142158.jpg",
-        styles: { backgroundColor: "#222" },
-        isbn: "9788932035338",
-    },
-    {
-        title: "82년생 김지영",
-        img: "https://shopping-phinf.pstatic.net/main_3246707/32467074651.20231003084626.jpg?type=w300",
-        styles: { backgroundColor: "#333" },
-        isbn: "9788937473135",
-    },
-    {
-        title: "작별하지 않는다",
-        img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
-        styles: { backgroundColor: "#444" },
-        isbn: "9788954682152",
-    },
-        {
-        title: "소년이로 (편혜영 소설집)",
-        img: "https://shopping-phinf.pstatic.net/main_3243615/32436154262.20221019142158.jpg",
-        styles: { backgroundColor: "#222" },
-        isbn: "9788932035338",
-    },
-    {
-        title: "82년생 김지영",
-        img: "https://shopping-phinf.pstatic.net/main_3246707/32467074651.20231003084626.jpg?type=w300",
-        styles: { backgroundColor: "#333" },
-        isbn: "9788937473135",
-    },
-    {
-        title: "작별하지 않는다",
-        img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
-        styles: { backgroundColor: "#444" },
-        isbn: "9788954682152",
-    },
-];
-
-const BookArrange = () => {
+const MainBookList = () => {
     const containerRef = useRef(null);
-    const controls = useAnimation();
-    const ITEM_WIDTH = 150;
+    const ITEM_WIDTH = 250;
     const GAP = 20;
     const MOVE_DISTANCE = ITEM_WIDTH + GAP;
 
     const handleLeftClick = () => {
         const container = containerRef.current;
-        const maxScrollLeft = 0;
         let newScrollLeft = container.scrollLeft - MOVE_DISTANCE;
-
-        if (newScrollLeft < maxScrollLeft) {
-        newScrollLeft = maxScrollLeft;
-        }
 
         container.scrollTo({
             left: newScrollLeft,
@@ -141,12 +71,7 @@ const BookArrange = () => {
 
     const handleRightClick = () => {
         const container = containerRef.current;
-        const maxScrollLeft = container.scrollWidth - container.clientWidth;
         let newScrollLeft = container.scrollLeft + MOVE_DISTANCE;
-
-        if (newScrollLeft > maxScrollLeft) {
-        newScrollLeft = maxScrollLeft;
-        }
 
         container.scrollTo({
             left: newScrollLeft,
@@ -158,6 +83,7 @@ const BookArrange = () => {
         <div>
             <h2 style={styles.title}>추천 도서</h2>
             <div style={styles.wrapper}>
+                {/* 왼쪽 버튼 */}
                 <button
                     style={{ ...styles.button, ...styles.leftButton }}
                     onClick={handleLeftClick}
@@ -165,16 +91,35 @@ const BookArrange = () => {
                     {"<"}
                 </button>
 
-                <div style={{ overflow: "hidden", width: "100%" }} ref={containerRef}>
-                    <motion.div style={styles.scrollContainer}>
-                    {books.map((book, index) => (
-                        <div key={`${book.isbn}-${index}`} style={{ minWidth: ITEM_WIDTH, flexShrink: 0 }}>
-                        <Book bookImg={book.img} styles={book.styles} />
-                        </div>
-                    ))}
+                {/* 스크롤 컨테이너 */}
+                <div 
+                    style={{ overflow: "hidden", width: "100%" }} 
+                    ref={containerRef}
+                >
+                    <motion.div 
+                        style={{
+                            ...styles.scrollContainer,
+                            width: `${(books.length * (ITEM_WIDTH + GAP)) - GAP - 2000}px`, // 전체 너비 조정
+                        }}
+                    >
+                        {books.map((book, index) => (
+                            <div 
+                                key={`${book.isbn}`} 
+                                style={styles.bookContainer}
+                            >
+                                <Link to={`${book.isbn}`}>
+                                    <Book 
+                                        bookImg={book.img} 
+                                        styles={{ width: "100%", height: "100%", marginTop: "0px" }} 
+                                        bookIsbn={book.isbn}
+                                    />
+                                </Link>
+                            </div>
+                        ))}
                     </motion.div>
                 </div>
 
+                {/* 오른쪽 버튼 */}
                 <button
                     style={{ ...styles.button, ...styles.rightButton }}
                     onClick={handleRightClick}
@@ -186,4 +131,4 @@ const BookArrange = () => {
     );
 };
 
-export default BookArrange;
+export default MainBookList;
