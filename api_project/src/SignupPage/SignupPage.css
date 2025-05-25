@@ -1,0 +1,120 @@
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 16px;
+  /* background-color: #f9fafe; */
+  box-sizing: border-box;
+}
+
+.signup-form {
+  width: 100%;
+  max-width: 400px;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 40px 30px;
+  box-shadow: 0 0 20px rgba(0, 114, 255, 0.1);
+  font-family: sans-serif;
+}
+
+.signup-form h2 {
+  color: #0066ff;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.signup-form label {
+  display: block;
+  font-size: 14px;
+  margin-top: 15px;
+  color: #666;
+}
+
+.signup-form input[type="id"],
+.signup-form input[type="nickname"],
+.signup-form input[type="text"],
+.signup-form input[type="password"] {
+  width: 95%;
+  padding: 10px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  margin-top: 5px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+  background-color: transparent;
+}
+
+.signup-form input:focus {
+  border-bottom: 1px solid #0070f3;
+}
+
+.agree-checkbox {
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.signup-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 30px;
+  border: 1px solid #0070f3;
+  color: #0070f3;
+  background-color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.signup-btn:hover {
+  background-color: #0070f3;
+  color: white;
+}
+
+/* ----------------- 반응형 설정 ----------------- */
+/* 태블릿 이하 (≤ 768px): 크기 약간 줄이기 */
+@media (max-width: 768px) {
+  .signup-form {
+    max-width: 320px;
+    padding: 28px 20px;
+  }
+
+  .signup-form h2 {
+    font-size: 17px;
+  }
+
+  .signup-btn {
+    font-size: 12.5px;
+  }
+}
+
+/* 모바일 (≤ 480px): 전체 폭 활용 */
+@media (max-width: 480px) {
+  .signup-form {
+    /* max-width: 100%; */
+    padding: 24px 16px;
+  }
+
+  .signup-form h2 {
+    font-size: 16px;
+  }
+
+  .gender-selection {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .agree-checkbox {
+    font-size: 11px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

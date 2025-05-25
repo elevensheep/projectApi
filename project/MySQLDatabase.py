@@ -10,7 +10,7 @@ class MySQLDatabase:
             "host": "127.0.0.1",
             "port": 3306,
             "user": "root",
-            "password": "1234",  # ✅ 정확한 비밀번호 입력
+            "password": "1208",  # ✅ 정확한 비밀번호 입력
             "database": "book_db",
             "auth_plugin": "mysql_native_password"  # ✅ 인증 방식 명시
         }

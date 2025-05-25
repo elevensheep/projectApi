@@ -8,6 +8,7 @@ import MyPage from "./MyPage/MyPage";
 import RecommendPage from "./RecommendPage/RecommendPage";
 import RecommendBookList from "./RecommendPage/Component/RecommendBookList";
 import BookDetail from "./Component/BookDetail";
+import SignupPage from "./SignupPage/SignupPage";
 
 function App() {
     return (
@@ -26,6 +27,9 @@ function App() {
                             <Route path=":isbn" element={<BookDetail />} />
                         </Route>
                     </Route>
+                    <Route path="/sign" element={<SignupPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+
                 </Routes>
             </BrowserRouter>
         </div>
