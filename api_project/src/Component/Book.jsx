@@ -1,13 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import BookDetail from "./BookDetail";
 
 const styles = {
-    link: {
-        width: "100%",
-        height: "100%",
-        display: "block",  // 크기 조정이 가능하도록 설정
-        textDecoration: "none",
-    },
     container: {
         width: "100%",
         height: "100%",
@@ -15,6 +9,7 @@ const styles = {
         flexDirection: "column",
         justifyContent: "center",
         overflow: "hidden",
+        cursor: "pointer",
     },
     img: {
         width: "100%",
@@ -31,11 +26,33 @@ const styles = {
 };
 
 const Book = ({ bookIsbn, bookImg, bookAlt, bookTitle, styles: customStyles }) => {
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+    const handleClick = () => {
+        setIsDetailOpen(true);
+    };
+
+    const handleClose = () => {
+        setIsDetailOpen(false);
+    };
+
     return (
-        <div style={{ ...styles.container, ...customStyles }}>
-            <img src={bookImg} alt={bookAlt || "Book Image"} style={styles.img} />
-            <h3 style={styles.text}>{bookTitle}</h3>
-        </div>
+        <>
+            <div style={{ ...styles.container, ...customStyles }} onClick={handleClick}>
+                <img src={bookImg} alt={bookAlt || "Book Image"} style={styles.img} />
+                <h3 style={styles.text}>{bookTitle}</h3>
+            </div>
+
+            {isDetailOpen && (
+                <BookDetail 
+                    isbn={bookIsbn}
+                    title={bookTitle}
+                    img={bookImg}
+                    description={`${bookTitle}의 상세 정보입니다.`}
+                    onClose={handleClose}
+                />
+            )}
+        </>
     );
 };
 

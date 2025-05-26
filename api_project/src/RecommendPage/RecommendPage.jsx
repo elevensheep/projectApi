@@ -35,7 +35,6 @@ const iconData = [
 const RecommendPage = () => {
     const navigate = useNavigate();
     const [selected, setSelected] = useState(null);
-
     const handleClick = (index, link) => {
         setSelected(selected === index ? null : index);
         navigate(`/recommend/${link}`);

@@ -13,8 +13,8 @@ const Icons = ({ link, icon, text, width = "250px", height = "250px", onClick })
             alignItems: "center",
             justifyContent: "center",
             display: "flex",
-            width: width, // Dynamic width
-            height: height, // Dynamic height
+            width: width, 
+            height: height, 
             color: "white",
             cursor: "pointer",
             overflow: "hidden",
