@@ -1,0 +1,106 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 16px;
+  box-sizing: border-box;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 400px;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 40px 30px; /* 회원가입 폼과 동일 */
+  box-shadow: 0 0 20px rgba(0, 114, 255, 0.1);
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+.login-form h2 {
+  color: #0066ff;
+  font-size: 20px; 
+  font-weight: 700;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.login-form label {
+  display: block;
+  font-size: 14px;
+  margin-top: 15px;
+  color: #666;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  width: 95%;
+  padding: 10px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  margin-top: 5px;
+  font-size: 14px;
+  outline: none;
+  background-color: transparent;
+}
+
+.login-form input:focus {
+  border-bottom: 1px solid #0070f3;
+}
+
+.remember-checkbox {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 30px;
+  border: 1px solid #0070f3;
+  color: #0070f3;
+  background-color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background-color: #0070f3;
+  color: white;
+}
+
+/* ----------------- 반응형 설정 ----------------- */
+@media (max-width: 768px) {
+  .login-form {
+    max-width: 320px;
+    padding: 28px 20px;
+  }
+
+  .login-form h2 {
+    font-size: 17px;
+  }
+
+  .login-btn {
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form {
+    padding: 24px 16px;
+  }
+
+  .login-form h2 {
+    font-size: 16px;
+  }
+
+  .remember-checkbox {
+    font-size: 11px;
+  }
+}

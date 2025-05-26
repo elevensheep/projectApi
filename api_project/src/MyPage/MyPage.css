@@ -1,0 +1,67 @@
+/* 페이지 전체 */
+.mypage {
+  padding: 40px 80px;
+  max-width: 1200px;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+/* 프로필 */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #ccc;
+}
+
+.profile p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+/* 북마크 */
+.bookmark-section h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.category-buttons button {
+  border: 1px solid #ccc;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.category-buttons .selected {
+  background-color: #e6ddf8;
+  border-color: #b29cd6;
+  color: #4a2c91;
+}
+
+.bookmark-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.bookmark-card {
+  text-decoration: none;
+  color: inherit;
+}
