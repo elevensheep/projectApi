@@ -24,8 +24,8 @@ const books = [
         category: "sports",
     },
     {
-        title: "경제학 개론",
-        img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
+        title: "환경경제학개론",
+        img: "https://shopping-phinf.pstatic.net/main_3343530/33435303704.20221228074616.jpg?type=w300",
         isbn: "9788954682161",
         category: "economy",
     },
@@ -60,7 +60,7 @@ const books = [
         category: "sports",
     },
     {
-        title: "화폐와 자본",
+        title: "돈의 심리학",
         img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
         isbn: "9788954682165",
         category: "economy",
@@ -96,7 +96,7 @@ const books = [
         category: "sports",
     },
     {
-        title: "세계 경제의 흐름",
+        title: "평생 투자자",
         img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
         isbn: "9788954682169",
         category: "economy",
@@ -132,7 +132,7 @@ const books = [
         category: "sports",
     },
     {
-        title: "주식 시장 분석",
+        title: "주식투자 절대원칙",
         img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
         isbn: "9788954682173",
         category: "economy",
@@ -168,7 +168,7 @@ const books = [
         category: "sports",
     },
     {
-        title: "경제학 개론",
+        title: "마인드셋은 어떻게 투자의 무기가 되는가",
         img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
         isbn: "19788954682161",
         category: "economy",
@@ -204,8 +204,8 @@ const books = [
         category: "sports",
     },
     {
-        title: "화폐와 자본",
-        img: "https://shopping-phinf.pstatic.net/main_3243636/32436366634.20231124160335.jpg?type=w300",
+        title: "자본을 읽자",
+        img: "https://shopping-phinf.pstatic.net/main_5225497/52254976626.20250104071329.jpg?type=w300",
         isbn: "19788954682165",
         category: "economy",
     },

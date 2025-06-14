@@ -74,7 +74,7 @@ const Header = () => {
         <div style={styles.wrapper}>
             <div style={styles.content}>
                 <div style={styles.leftGroup}>
-                    <Link to="/"><h1>Title</h1></Link>
+                    <Link to="/"><h1>북트렌드</h1></Link>
                     <nav style={styles.nav}>
                         <Link to="/recommend">도서 추천</Link>
                         <Link to="/list">도서 목록</Link>
