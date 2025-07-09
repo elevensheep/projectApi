@@ -14,7 +14,6 @@
   padding: 40px 30px; /* 회원가입 폼과 동일 */
   box-shadow: 0 0 20px rgba(0, 114, 255, 0.1);
   font-family: sans-serif;
-  box-sizing: border-box;
 }
 
 .login-form h2 {

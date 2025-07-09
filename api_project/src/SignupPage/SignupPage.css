@@ -61,6 +61,10 @@
   line-height: 1.4;
 }
 
+.agree-checkbox span {
+  word-break: keep-all;
+}
+
 .signup-btn {
   width: 100%;
   padding: 12px;
