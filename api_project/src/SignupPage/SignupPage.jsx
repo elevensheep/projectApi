@@ -35,7 +35,7 @@ function SignupPage() {
         <input type="text" name="id" value={formData.id} onChange={handleChange} required />
         
         <label>* 닉네임</label>
-        <input type="text" name="nickname" value={formData.id} onChange={handleChange} required />
+        <input type="text" name="nickname" value={formData.nickname} onChange={handleChange} required />
 
         <label>* 비밀번호</label>
         <input type="password" name="password" value={formData.password} onChange={handleChange} required />
