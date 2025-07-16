@@ -1,5 +1,5 @@
 // src/service/bookService.js
-import { apiGet } from "./request";
+import { apiGet, apiPost } from "./request";
 
 export const fetchBookDetail = async (isbn) => {
     console.log("📚 [fetchBookDetail] 요청 시작:", isbn); // 요청 전 로그
@@ -14,3 +14,7 @@ export const fetchBookDetail = async (isbn) => {
     }
 };
 
+export const getBookStoresByIsbn = async (isbn) => {
+    const res = await apiPost("/bookstores", { isbn });
+    return res.itemOffStoreList;
+};

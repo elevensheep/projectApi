@@ -78,6 +78,7 @@ const RecommendBookList = () => {
                         flexWrap: "wrap",
                         justifyContent: "center",
                         gap: "30px",
+
                     }}
                 >
                     {books.map((book) => (
@@ -90,6 +91,7 @@ const RecommendBookList = () => {
                                 boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                                 overflow: "hidden",
                                 cursor: "pointer",
+                                backgroundColor: '#F5F5EB'
                             }}
                             onClick={() => setSelectedBookIsbn(book.books_isbn)}
                         >
@@ -154,7 +156,11 @@ const RecommendBookList = () => {
             {/* 상세 모달 */}
             {selectedBookIsbn && (
                 <div
-                    onClick={() => setSelectedBookIsbn(null)}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setSelectedBookIsbn(null);
+                        }
+                    }}
                     style={{
                         position: "fixed",
                         top: 0,
@@ -168,7 +174,7 @@ const RecommendBookList = () => {
                         zIndex: 999,
                     }}
                 >
-                    <BookDetail isbn={selectedBookIsbn} />
+                    <BookDetail isbn={selectedBookIsbn} onClose={() => setSelectedBookIsbn(null)}/>
                 </div>
             )}
         </div>

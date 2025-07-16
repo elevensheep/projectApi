@@ -1,13 +1,13 @@
 import React from 'react';
 
-const Aladin = () => {
+const Aladin = ({ offName, link }) => {
     const styles = {
         wrapper: {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            width: "100px",
+            width: "95px",
             height: "70px",
             fontSize: "10px",
             textAlign: "center",
@@ -21,8 +21,10 @@ const Aladin = () => {
 
     return (
         <div style={styles.wrapper}>
-            <h3 style={{marginTop: "0px"}}>목동점</h3>
-            <a href="#" style={{marginTop: "3px"}}>바로가기</a>
+            <h3 style={{ marginTop: "0px" }}>{offName}</h3>
+            <a href={link} target="_blank" rel="noopener noreferrer" style={{ marginTop: "3px" }}>
+                바로가기
+            </a>
         </div>
     );
 };

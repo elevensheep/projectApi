@@ -178,7 +178,11 @@ const MainBookList = () => {
 
             {selectedIsbn && (
                 <div
-                    onClick={() => setSelectedIsbn(null)}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setSelectedIsbn(null);
+                        }
+                    }}
                     style={{
                         position: "fixed",
                         top: 0,
@@ -192,7 +196,7 @@ const MainBookList = () => {
                         zIndex: 999,
                     }}
                 >
-                    <BookDetail isbn={selectedIsbn} />
+                    <BookDetail isbn={selectedIsbn} onClose={() => setSelectedIsbn(null)}/>
                 </div>
             )}
         </div>

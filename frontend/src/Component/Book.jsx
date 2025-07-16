@@ -22,7 +22,7 @@ const styles = {
         objectFit: "contain",
     },
     text: {
-        margin: "10px 0",
+        margin: "10px",
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
