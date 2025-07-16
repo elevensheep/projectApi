@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+beautifulsoup4
+requests
+pandas
+mysql-connector-python
+konlpy
+gensim
+scikit-learn
+matplotlib
+python-dotenv
+numpy==1.26.4
+        
