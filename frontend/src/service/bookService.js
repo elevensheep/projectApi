@@ -18,3 +18,11 @@ export const getBookStoresByIsbn = async (isbn) => {
     const res = await apiPost("/bookstores", { isbn });
     return res.itemOffStoreList;
 };
+
+export const fetchAllBooks = async (page = 0) => {
+    return await apiGet(`/books?page=${page}&size=20`);
+};
+
+export const fetchBooksByCategory = async (category, page = 0) => {
+    return await apiGet(`/books/category/${encodeURIComponent(category)}?page=${page}&size=20`);
+};
