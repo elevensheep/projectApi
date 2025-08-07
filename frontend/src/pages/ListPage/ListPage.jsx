@@ -18,6 +18,17 @@ const ListPage = () => {
     const limit = 20;
     const maxButtons = 10;
 
+    // 파스텔톤 색상 팔레트
+    const pastelColors = {
+        "인문과학": "#FFB3BA", // 파스텔 핑크
+        "사회과학": "#BAFFC9", // 파스텔 그린
+        "자연과학": "#BAE1FF", // 파스텔 블루
+        "어문학": "#FFFFBA", // 파스텔 옐로우
+        "미분류": "#E8BAFF", // 파스텔 퍼플
+        "문학": "#FFD4BA", // 파스텔 오렌지
+        "한국소설": "#BAFFE8", // 파스텔 민트
+    };
+
     const handleCategoryChange = (newCategory) => {
         setSearchParams({ category: newCategory, page: "1" });
     };
@@ -29,14 +40,27 @@ const ListPage = () => {
     useEffect(() => {
         const fetchBooks = async () => {
             try {
+                console.log("📚 ListPage - 도서 목록 요청:", { category, currentPage });
+                
                 const res = category
                     ? await fetchBooksByCategory(category, currentPage - 1)
                     : await fetchAllBooks(currentPage - 1);
 
-                setBooks(res.content || []);
-                setTotalPages(res.totalPages || 1);
+                console.log("✅ ListPage - 도서 목록 응답:", res);
+                
+                // Spring Boot API 응답 구조에 맞게 처리
+                if (res && res.content) {
+                    setBooks(res.content || []);
+                    setTotalPages(res.totalPages || 1);
+                } else {
+                    // FastAPI 응답 구조 (books 배열)
+                    setBooks(res.books || res || []);
+                    setTotalPages(res.totalPages || Math.ceil((res.total || 0) / limit) || 1);
+                }
             } catch (err) {
-                console.error("도서 조회 실패", err);
+                console.error("❌ ListPage - 도서 조회 실패:", err);
+                setBooks([]);
+                setTotalPages(1);
             }
         };
 
@@ -51,26 +75,65 @@ const ListPage = () => {
 
     return (
         <div style={{ display: "flex", maxWidth: "1400px", margin: "0 auto", padding: "40px 0" }}>
-            {/* 카테고리 패널 */}
-            <aside style={{ width: "200px", paddingRight: "20px" }}>
+            {/* 카테고리 패널 - 스크롤 고정 */}
+            <aside style={{ 
+                width: "200px", 
+                paddingRight: "20px",
+                position: "sticky",
+                top: "205px",
+                height: "fit-content",
+                alignSelf: "flex-start"
+            }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => handleCategoryChange(cat)}
-                            style={{
-                                padding: "10px",
-                                border: "none",
-                                borderRadius: "6px",
-                                backgroundColor: category === cat ? "#4f8cff" : "#f0f0f0",
-                                color: category === cat ? "white" : "black",
-                                fontWeight: "bold",
-                                cursor: "pointer",
-                            }}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+                    {categories.map((cat) => {
+                        const isSelected = category === cat;
+                        const pastelColor = pastelColors[cat] || "#F0F0F0";
+                        
+                        return (
+                            <button
+                                key={cat}
+                                onClick={() => handleCategoryChange(cat)}
+                                style={{
+                                    padding: "12px 16px",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    backgroundColor: isSelected ? pastelColor : "#ffffff",
+                                    color: isSelected ? "#333333" : "#666666",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    boxShadow: isSelected 
+                                        ? `0 4px 12px ${pastelColor}80` 
+                                        : "0 2px 8px rgba(0, 0, 0, 0.1)",
+                                    transition: "all 0.2s ease-in-out",
+                                    transform: isSelected ? "translateY(-1px)" : "translateY(0)",
+                                    border: isSelected 
+                                        ? `2px solid ${pastelColor}` 
+                                        : "1px solid #e0e0e0",
+                                    position: "relative",
+                                    overflow: "hidden",
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSelected) {
+                                        e.target.style.backgroundColor = pastelColor + "20";
+                                        e.target.style.boxShadow = `0 4px 12px ${pastelColor}40`;
+                                        e.target.style.transform = "translateY(-1px)";
+                                        e.target.style.color = "#333333";
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSelected) {
+                                        e.target.style.backgroundColor = "#ffffff";
+                                        e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+                                        e.target.style.transform = "translateY(0)";
+                                        e.target.style.color = "#666666";
+                                    }
+                                }}
+                            >
+                                {cat}
+                            </button>
+                        );
+                    })}
                 </div>
             </aside>
 
@@ -88,7 +151,7 @@ const ListPage = () => {
                     >
                         {books.map((book) => (
                             <li
-                                key={book.bookIsbn}
+                                key={book.bookIsbn || book.books_isbn}
                                 style={{
                                     width: "250px",
                                     height: "300px",
@@ -98,13 +161,13 @@ const ListPage = () => {
                                     cursor: "pointer",
                                     overflow: "hidden",
                                 }}
-                                onClick={() => setSelectedBookIsbn(book.bookIsbn)}
+                                onClick={() => setSelectedBookIsbn(book.bookIsbn || book.books_isbn)}
                             >
                                 <Book
-                                    bookIsbn={book.bookIsbn}
-                                    bookImg={book.bookImg}
-                                    bookAlt={book.bookTitle}
-                                    bookTitle={book.bookTitle}
+                                    bookIsbn={book.bookIsbn || book.books_isbn}
+                                    bookImg={book.bookImg || book.books_img}
+                                    bookAlt={book.bookTitle || book.books_title}
+                                    bookTitle={book.bookTitle || book.books_title}
                                     styles={{ height: "100%" }}
                                 />
                             </li>

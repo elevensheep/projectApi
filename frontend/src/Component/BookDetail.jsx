@@ -6,16 +6,29 @@ import Aladin from "./Aladin";
 const BookDetail = ({ isbn, onClose }) => {
     const [book, setBook] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [showStores, setShowStores] = useState(false);
     const [storeList, setStoreList] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!isbn) {
+                setError("ISBN이 제공되지 않았습니다.");
+                setLoading(false);
+                return;
+            }
+
             try {
+                setLoading(true);
+                setError(null);
+                console.log("📚 BookDetail - ISBN으로 도서 정보 요청:", isbn);
+                
                 const data = await fetchBookDetail(isbn);
+                console.log("✅ BookDetail - 도서 정보 수신:", data);
                 setBook(data);
             } catch (err) {
-                console.error("❌ 도서 상세 정보 불러오기 실패:", err);
+                console.error("❌ BookDetail - 도서 상세 정보 불러오기 실패:", err);
+                setError(err.message || "도서 정보를 불러오는데 실패했습니다.");
             } finally {
                 setLoading(false);
             }
@@ -30,14 +43,140 @@ const BookDetail = ({ isbn, onClose }) => {
                 setStoreList(stores);
             } catch (err) {
                 console.error("❌ 지점 정보 조회 실패:", err);
+                setError("지점 정보를 불러오는데 실패했습니다.");
                 return;
             }
         }
         setShowStores(!showStores);
     };
 
-    if (loading) return <p style={{ color: "white" }}>불러오는 중...</p>;
-    if (!book) return <p style={{ color: "white" }}>책 정보를 찾을 수 없습니다.</p>;
+    // Spring Boot API 응답의 필드명을 FastAPI 구조와 맞춰서 사용
+    const getBookImage = () => {
+        return book?.bookImg || book?.books_img || "https://via.placeholder.com/300x400?text=No+Image";
+    };
+
+    const getBookTitle = () => {
+        return book?.bookTitle || book?.books_title || "제목 없음";
+    };
+
+    const getBookDescription = () => {
+        return book?.bookDescription || book?.books_description || "도서 설명이 없습니다.";
+    };
+
+    if (loading) {
+        return (
+            <motion.div
+                style={{
+                    position: "relative",
+                    width: "60%",
+                    height: "600px",
+                    backgroundColor: "#fff",
+                    borderRadius: "16px",
+                    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.15)",
+                    padding: "20px",
+                    zIndex: 1000,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+                <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: "24px", marginBottom: "10px" }}>📚</div>
+                    <p style={{ fontSize: "18px", color: "#666" }}>도서 정보를 불러오는 중...</p>
+                </div>
+            </motion.div>
+        );
+    }
+
+    if (error) {
+        return (
+            <motion.div
+                style={{
+                    position: "relative",
+                    width: "60%",
+                    height: "600px",
+                    backgroundColor: "#fff",
+                    borderRadius: "16px",
+                    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.15)",
+                    padding: "20px",
+                    zIndex: 1000,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+                <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: "24px", marginBottom: "10px" }}>❌</div>
+                    <p style={{ fontSize: "18px", color: "#e74c3c" }}>{error}</p>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            marginTop: "20px",
+                            padding: "10px 20px",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#7b68ee",
+                            color: "white",
+                            cursor: "pointer",
+                        }}
+                    >
+                        닫기
+                    </button>
+                </div>
+            </motion.div>
+        );
+    }
+
+    if (!book) {
+        return (
+            <motion.div
+                style={{
+                    position: "relative",
+                    width: "60%",
+                    height: "600px",
+                    backgroundColor: "#fff",
+                    borderRadius: "16px",
+                    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.15)",
+                    padding: "20px",
+                    zIndex: 1000,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+                <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: "24px", marginBottom: "10px" }}>🔍</div>
+                    <p style={{ fontSize: "18px", color: "#666" }}>책 정보를 찾을 수 없습니다.</p>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            marginTop: "20px",
+                            padding: "10px 20px",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#7b68ee",
+                            color: "white",
+                            cursor: "pointer",
+                        }}
+                    >
+                        닫기
+                    </button>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
@@ -79,13 +218,16 @@ const BookDetail = ({ isbn, onClose }) => {
             {/* 이미지 + 제목 */}
             <div style={{ width: "50%", height: "100%", paddingTop: "50px" }}>
                 <img
-                    src={book.bookImg}
-                    alt={book.bookTitle}
+                    src={getBookImage()}
+                    alt={getBookTitle()}
                     style={{
                         width: "100%",
                         height: "80%",
                         objectFit: "contain",
                         borderRadius: "12px",
+                    }}
+                    onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/300x400?text=No+Image";
                     }}
                 />
                 <h1
@@ -96,7 +238,7 @@ const BookDetail = ({ isbn, onClose }) => {
                         marginTop: "10px",
                     }}
                 >
-                    {book.bookTitle}
+                    {getBookTitle()}
                 </h1>
             </div>
 
@@ -125,12 +267,16 @@ const BookDetail = ({ isbn, onClose }) => {
                     }}
                 >
                     {!showStores ? (
-                        book.bookDescription || "도서 설명이 없습니다."
+                        getBookDescription()
                     ) : (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-                            {storeList.map((store, index) => (
-                                <Aladin key={index} offName={store.offName} link={store.link} />
-                            ))}
+                            {storeList && storeList.length > 0 ? (
+                                storeList.map((store, index) => (
+                                    <Aladin key={index} offName={store.offName} link={store.link} />
+                                ))
+                            ) : (
+                                <p style={{ color: "#666" }}>재고 정보가 없습니다.</p>
+                            )}
                         </div>
                     )}
                 </div>

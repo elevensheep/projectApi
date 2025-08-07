@@ -199,4 +199,45 @@ class MySQLDatabase:
             self.cursor.close()
         if self.conn:
             self.conn.close()
-        print("✅ MySQL 연결 종료!")
+        print("🔌 MySQL 연결 종료")
+
+    def add_similarity_score_column(self):
+        """tb_recommend 테이블에 similarity_score 컬럼 추가"""
+        try:
+            # 컬럼이 존재하는지 확인
+            check_query = """
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = %s 
+                AND TABLE_NAME = 'tb_recommend' 
+                AND COLUMN_NAME = 'similarity_score'
+            """
+            result = self.fetch_query(check_query, (self.DB_CONFIG["database"],))
+            
+            if not result:
+                # 컬럼이 없으면 추가
+                alter_query = """
+                    ALTER TABLE tb_recommend 
+                    ADD COLUMN similarity_score DECIMAL(5,4) DEFAULT NULL
+                """
+                self.execute_query(alter_query)
+                print("✅ similarity_score 컬럼이 성공적으로 추가되었습니다.")
+            else:
+                print("ℹ️ similarity_score 컬럼이 이미 존재합니다.")
+                
+        except Exception as e:
+            print(f"❌ similarity_score 컬럼 추가 실패: {e}")
+
+    def update_similarity_scores(self):
+        """기존 추천 데이터에 기본 similarity_score 값 설정"""
+        try:
+            update_query = """
+                UPDATE tb_recommend 
+                SET similarity_score = 1.0 
+                WHERE similarity_score IS NULL
+            """
+            self.execute_query(update_query)
+            print("✅ 기존 추천 데이터에 기본 similarity_score가 설정되었습니다.")
+            
+        except Exception as e:
+            print(f"❌ similarity_score 업데이트 실패: {e}")
