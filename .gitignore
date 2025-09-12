@@ -3,3 +3,5 @@ application.properties
 .env
 
 venv39/
+
+venv_new/

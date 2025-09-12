@@ -253,33 +253,127 @@ class Nlp:
             except Exception as e:
                 print("🚨 FastText 모델 로딩 중 오류:", e)
     
-    def find_optimal_clusters(self, word_vectors, max_clusters=20):
-        """최적 클러스터 수 찾기"""
+    def find_optimal_clusters_elbow(self, word_vectors, max_clusters=20):
+        """엘보우 기법을 사용한 최적 클러스터 수 찾기"""
+        if len(word_vectors) < 2:
+            print("⚠️ 데이터가 부족합니다. 최소 2개의 데이터 포인트가 필요합니다.")
+            return 2
+        
+        # 클러스터 수 범위 설정
+        cluster_range = range(1, min(max_clusters + 1, len(word_vectors)))
+        inertias = []
         silhouette_scores = []
-        calinski_scores = []
-        cluster_range = range(2, min(max_clusters + 1, len(word_vectors) // 2))
+        
+        print("🔍 엘보우 기법으로 최적 클러스터 수를 찾는 중...")
         
         for n_clusters in cluster_range:
-            kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-            labels = kmeans.fit_predict(word_vectors)
-            
-            if len(set(labels)) > 1:  # 최소 2개 클러스터
-                silhouette_scores.append(silhouette_score(word_vectors, labels))
-                calinski_scores.append(calinski_harabasz_score(word_vectors, labels))
+            if n_clusters == 1:
+                # 클러스터가 1개일 때는 inertia 계산
+                inertia = np.sum([np.sum((word_vectors - np.mean(word_vectors, axis=0))**2)])
+                inertias.append(inertia)
+                silhouette_scores.append(0)  # 클러스터가 1개일 때는 실루엣 점수 0
             else:
-                silhouette_scores.append(0)
-                calinski_scores.append(0)
+                kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                labels = kmeans.fit_predict(word_vectors)
+                inertias.append(kmeans.inertia_)
+                
+                if len(set(labels)) > 1:  # 최소 2개 클러스터
+                    silhouette_scores.append(silhouette_score(word_vectors, labels))
+                else:
+                    silhouette_scores.append(0)
         
-        # 실루엣 점수가 가장 높은 클러스터 수 선택
-        optimal_clusters = cluster_range[np.argmax(silhouette_scores)]
+        # 엘보우 포인트 찾기 (inertia의 변화율이 급격히 감소하는 지점)
+        if len(inertias) > 2:
+            # 2차 미분을 사용하여 엘보우 포인트 찾기
+            first_derivative = np.diff(inertias)
+            second_derivative = np.diff(first_derivative)
+            
+            # 2차 미분이 가장 큰 지점을 엘보우 포인트로 선택
+            if len(second_derivative) > 0:
+                elbow_idx = np.argmax(second_derivative) + 2  # +2는 인덱스 보정
+                elbow_clusters = cluster_range[elbow_idx]
+            else:
+                elbow_clusters = 2
+        else:
+            elbow_clusters = 2
         
-        print(f"📊 최적 클러스터 수: {optimal_clusters}")
+        # 실루엣 점수 기반 최적 클러스터 수
+        if len(silhouette_scores) > 1:
+            silhouette_optimal = cluster_range[np.argmax(silhouette_scores[1:]) + 1]
+        else:
+            silhouette_optimal = 2
+        
+        print(f"📊 엘보우 기법 결과: {elbow_clusters}개 클러스터")
+        print(f"📊 실루엣 점수 기반: {silhouette_optimal}개 클러스터")
         print(f"📊 최고 실루엣 점수: {max(silhouette_scores):.4f}")
         
+        # 엘보우와 실루엣 점수를 종합하여 최적 클러스터 수 결정
+        optimal_clusters = min(elbow_clusters, silhouette_optimal)
+        
+        return optimal_clusters, inertias, silhouette_scores, cluster_range
+    
+    def plot_elbow_method(self, word_vectors, max_clusters=20, save_path=None):
+        """엘보우 기법 시각화"""
+        if len(word_vectors) < 2:
+            print("⚠️ 데이터가 부족합니다. 최소 2개의 데이터 포인트가 필요합니다.")
+            return
+        
+        # 엘보우 기법으로 최적 클러스터 수 찾기
+        optimal_clusters, inertias, silhouette_scores, cluster_range = self.find_optimal_clusters_elbow(word_vectors, max_clusters)
+        
+        # 그래프 설정
+        if platform.system() == "Windows":
+            plt.rcParams['font.family'] = 'Malgun Gothic'
+        else:
+            plt.rcParams['font.family'] = 'Nanum Gothic'
+        
+        # 서브플롯 생성
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        
+        # 엘보우 그래프 (Inertia)
+        ax1.plot(cluster_range, inertias, 'bo-', linewidth=2, markersize=8)
+        ax1.axvline(x=optimal_clusters, color='red', linestyle='--', linewidth=2, 
+                   label=f'최적 클러스터 수: {optimal_clusters}')
+        ax1.set_xlabel('클러스터 수', fontsize=12)
+        ax1.set_ylabel('Inertia (Within-Cluster Sum of Squares)', fontsize=12)
+        ax1.set_title('엘보우 기법 (Elbow Method)', fontsize=14, fontweight='bold')
+        ax1.grid(True, alpha=0.3)
+        ax1.legend()
+        
+        # 실루엣 점수 그래프
+        if len(silhouette_scores) > 1:
+            ax2.plot(cluster_range[1:], silhouette_scores[1:], 'go-', linewidth=2, markersize=8)
+            silhouette_optimal = cluster_range[np.argmax(silhouette_scores[1:]) + 1]
+            ax2.axvline(x=silhouette_optimal, color='red', linestyle='--', linewidth=2,
+                       label=f'최적 클러스터 수: {silhouette_optimal}')
+            ax2.set_xlabel('클러스터 수', fontsize=12)
+            ax2.set_ylabel('Silhouette Score', fontsize=12)
+            ax2.set_title('실루엣 점수 (Silhouette Score)', fontsize=14, fontweight='bold')
+            ax2.grid(True, alpha=0.3)
+            ax2.legend()
+        else:
+            ax2.text(0.5, 0.5, '데이터 부족\n(최소 2개 클러스터 필요)', 
+                    ha='center', va='center', transform=ax2.transAxes, fontsize=12)
+            ax2.set_title('실루엣 점수 (데이터 부족)', fontsize=14, fontweight='bold')
+        
+        plt.tight_layout()
+        
+        # 그래프 저장
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"📊 엘보우 그래프가 저장되었습니다: {save_path}")
+        
+        plt.show()
+        
+        return optimal_clusters, inertias, silhouette_scores, cluster_range
+    
+    def find_optimal_clusters(self, word_vectors, max_clusters=20):
+        """기존 최적 클러스터 수 찾기 (호환성 유지)"""
+        optimal_clusters, _, _, _ = self.find_optimal_clusters_elbow(word_vectors, max_clusters)
         return optimal_clusters
     
-    def VisualizeModel(self, word_list=None, num_clusters=None, method='kmeans'):
-        """향상된 시각화"""
+    def VisualizeModel(self, word_list=None, num_clusters=None, method='kmeans', use_elbow=True, show_elbow_plot=True):
+        """향상된 시각화 - 엘보우 기법 통합"""
         if self.model is None:
             print("⚠️ 모델이 로드되지 않았습니다.")
             return
@@ -308,7 +402,18 @@ class Nlp:
 
         # 클러스터링
         if num_clusters is None:
-            num_clusters = self.find_optimal_clusters(reduced_vectors)
+            if use_elbow:
+                print("🔍 엘보우 기법을 사용하여 최적 클러스터 수를 찾는 중...")
+                if show_elbow_plot:
+                    # 엘보우 그래프 표시
+                    optimal_clusters, inertias, silhouette_scores, cluster_range = self.plot_elbow_method(
+                        reduced_vectors, max_clusters=20
+                    )
+                    num_clusters = optimal_clusters
+                else:
+                    num_clusters = self.find_optimal_clusters(reduced_vectors)
+            else:
+                num_clusters = self.find_optimal_clusters(reduced_vectors)
         
         if method == 'kmeans':
             clustering = KMeans(n_clusters=num_clusters, random_state=42, n_init=10)
@@ -327,6 +432,73 @@ class Nlp:
 
         # 시각화
         self._plot_clusters(reduced_vectors, word_list, labels, num_clusters, method)
+    
+    def find_clusters_with_elbow(self, word_list=None, max_clusters=20, method='kmeans'):
+        """엘보우 기법을 사용한 클러스터링 전용 함수"""
+        if self.model is None:
+            print("⚠️ 모델이 로드되지 않았습니다.")
+            return None, None, None
+        
+        # 단어 리스트 선택
+        if word_list is None:
+            word_list = list(self.model.wv.key_to_index)[:1000]
+        
+        # 벡터 추출
+        word_list = [word for word in word_list if word in self.model.wv]
+        word_vectors = np.array([self.model.wv[word] for word in word_list])
+        
+        # 차원 축소
+        pca = PCA(n_components=min(50, len(word_vectors[0])))
+        word_vectors_pca = pca.fit_transform(word_vectors)
+        
+        tsne = TSNE(
+            n_components=2,
+            perplexity=min(30, len(word_vectors) - 1),
+            learning_rate=200,
+            n_iter=2000,
+            random_state=42,
+            init='pca'
+        )
+        reduced_vectors = tsne.fit_transform(word_vectors_pca)
+        
+        # 엘보우 기법으로 최적 클러스터 수 찾기
+        print("🔍 엘보우 기법을 사용하여 최적 클러스터 수를 찾는 중...")
+        optimal_clusters, inertias, silhouette_scores, cluster_range = self.plot_elbow_method(
+            reduced_vectors, max_clusters=max_clusters
+        )
+        
+        # 클러스터링 실행
+        if method == 'kmeans':
+            clustering = KMeans(n_clusters=optimal_clusters, random_state=42, n_init=10)
+        elif method == 'dbscan':
+            clustering = DBSCAN(eps=0.5, min_samples=5)
+        elif method == 'agglomerative':
+            clustering = AgglomerativeClustering(n_clusters=optimal_clusters)
+        
+        labels = clustering.fit_predict(reduced_vectors)
+        
+        # 클러스터 품질 평가
+        if len(set(labels)) > 1:
+            silhouette_avg = silhouette_score(reduced_vectors, labels)
+            calinski_avg = calinski_harabasz_score(reduced_vectors, labels)
+            print(f"📊 최종 클러스터 품질 - 실루엣: {silhouette_avg:.4f}, 칼린스키: {calinski_avg:.4f}")
+        
+        # 클러스터별 단어 그룹화
+        cluster_groups = {}
+        for i, (word, label) in enumerate(zip(word_list, labels)):
+            if label not in cluster_groups:
+                cluster_groups[label] = []
+            cluster_groups[label].append(word)
+        
+        print(f"✅ 총 {len(cluster_groups)}개의 클러스터가 생성되었습니다.")
+        for cluster_id, words in cluster_groups.items():
+            print(f"📌 클러스터 {cluster_id}: {len(words)}개 단어")
+            if len(words) <= 10:  # 단어가 10개 이하면 모두 출력
+                print(f"   단어들: {', '.join(words[:10])}")
+            else:  # 10개 초과면 대표 단어만 출력
+                print(f"   대표 단어들: {', '.join(words[:5])}... (총 {len(words)}개)")
+        
+        return reduced_vectors, labels, cluster_groups
     
     def _plot_clusters(self, vectors, words, labels, num_clusters, method):
         """클러스터 시각화"""
