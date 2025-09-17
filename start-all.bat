@@ -45,13 +45,8 @@ echo.
 :: 1. Start FastAPI server (background)
 echo [1/3] Starting FastAPI server... (Port: 8000)
 cd /d "%ORIGINAL_DIR%\py"
-if not exist "venv39\Scripts\activate.bat" (
-    echo Python virtual environment not found. Creating...
-    python -m venv venv39
-)
-call venv39\Scripts\activate.bat
 pip install -r requirements.txt >nul 2>&1
-start "FastAPI Server" cmd /k "cd /d %ORIGINAL_DIR%\py && call venv39\Scripts\activate.bat && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+start "FastAPI Server" cmd /k "cd /d %ORIGINAL_DIR%\py && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 timeout /t 3 /nobreak >nul
 
 :: 2. Start Spring Boot server (background)

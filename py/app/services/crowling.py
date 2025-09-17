@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-from app.services.nlp import Nlp
+from services.nlp import Nlp
 from collections import Counter
-from app.services.database import MySQLDatabase
+from services.database import MySQLDatabase
 
 class Crowling:
     
@@ -57,6 +57,20 @@ class Crowling:
                 result = self.processor.KonlpyOkt(h2_texts)
                 all_nouns[section].append(result) 
         return all_nouns
+    
+    def get_news_titles(self):
+        """뉴스 제목을 그대로 반환 (BERT 시스템용)"""
+        news_titles = {}
+        
+        for section, urls in self.sections.items():
+            news_titles[section] = []
+            for url in urls:
+                h2_texts = self.scrape_h2_text(url)
+                # 빈 제목 제거 및 필터링
+                filtered_titles = [title for title in h2_texts if title and len(title.strip()) > 5]
+                news_titles[section].extend(filtered_titles)
+        
+        return news_titles
     
     def wordExtraction(self):
         newsData = {}

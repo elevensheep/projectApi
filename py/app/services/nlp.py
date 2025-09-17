@@ -1,21 +1,35 @@
 import os
-from konlpy.tag import Kkma, Okt, Komoran
-from gensim.models import Word2Vec, FastText
+import re
+from collections import Counter
+import jamo
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# KoNLPy import 시도 (실패 시 fallback)
+try:
+    from konlpy.tag import Kkma, Okt, Komoran
+    KONLPY_AVAILABLE = True
+except ImportError:
+    print("⚠️ KoNLPy를 사용할 수 없습니다. 기본 텍스트 처리만 사용합니다.")
+    KONLPY_AVAILABLE = False
+
+try:
+    from gensim.models import Word2Vec, FastText
+    GENSIM_AVAILABLE = True
+except ImportError:
+    print("⚠️ Gensim을 사용할 수 없습니다. 기본 텍스트 처리만 사용합니다.")
+    GENSIM_AVAILABLE = False
+
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import pandas as pd
-from app.services.database import MySQLDatabase
+from services.database import MySQLDatabase
 from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.metrics import silhouette_score, calinski_harabasz_score
 import platform
 from matplotlib.patches import Patch
-import re
-from collections import Counter
-import jamo
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 class Nlp:
     

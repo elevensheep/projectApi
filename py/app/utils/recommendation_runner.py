@@ -255,11 +255,12 @@ def evaluate_recommendation_quality():
     
     db.close()
 
+# 기존 추천 시스템 (호환성 유지)
+def recommend_books_by_keywords(news_data: dict):
+    """기존 추천 시스템 호환성을 위한 래퍼 함수"""
+    recommend_books_by_keywords_enhanced(news_data)
+
 if __name__ == "__main__":
-    # 기존 추천 시스템 (호환성 유지)
-    def recommend_books_by_keywords(news_data: dict):
-        recommend_books_by_keywords_enhanced(news_data)
-    
     crawler = Crowling()
     print("📡 중앙일보 뉴스 키워드 크롤링 중...")
     news_data = crawler.wordExtraction()
