@@ -13,7 +13,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from services.bert_nlp import BertNLP
-from services.database import MySQLDatabase
+from services.database import PostgreSQLDatabase
 from datetime import datetime
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -37,7 +37,7 @@ class OptimizedBertRecommendationSystem:
     def __init__(self, cache_dir: str = "cache", batch_size: int = 64, max_workers: int = 4):
         """최적화된 BERT 추천 시스템 초기화"""
         self.bert_nlp = BertNLP()
-        self.db = MySQLDatabase()
+        self.db = PostgreSQLDatabase()
         self.cache_dir = cache_dir
         self.batch_size = batch_size
         self.max_workers = max_workers

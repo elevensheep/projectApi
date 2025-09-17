@@ -13,7 +13,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from services.bert_nlp import BertNLP
-from services.database import MySQLDatabase
+from services.database import PostgreSQLDatabase
 from datetime import datetime
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -33,7 +33,7 @@ class BertRecommendationSystem:
     def __init__(self):
         """BERT 추천 시스템 초기화"""
         self.bert_nlp = BertNLP()
-        self.db = MySQLDatabase()
+        self.db = PostgreSQLDatabase()
         logger.info("BERT 추천 시스템 초기화 완료")
     
     def recommend_books_by_context(self, news_data: dict) -> Dict[str, List[Tuple[str, float]]]:

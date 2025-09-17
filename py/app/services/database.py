@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-MySQL 데이터베이스 서비스
+PostgreSQL 데이터베이스 서비스 (Supabase)
 - 연결 풀링
 - 에러 핸들링
 - 로깅 시스템
 - 성능 최적화
 """
 
-import mysql.connector
-from mysql.connector import pooling
+import psycopg2
+from psycopg2 import pool
+from psycopg2.extras import RealDictCursor
 from datetime import datetime
 import pandas as pd
 from collections import defaultdict
@@ -26,12 +27,12 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()  # 🔑 .env 파일 로드
 
-class MySQLDatabase:
-    """MySQL 데이터베이스 연결 및 관리 클래스"""
+class PostgreSQLDatabase:
+    """PostgreSQL 데이터베이스 연결 및 관리 클래스 (Supabase)"""
     
     def __init__(self, use_pool: bool = True):
         """
-        MySQL 데이터베이스 초기화
+        PostgreSQL 데이터베이스 초기화
         
         Args:
             use_pool: 연결 풀 사용 여부 (기본값: True)
@@ -41,20 +42,16 @@ class MySQLDatabase:
         self.conn = None
         self.cursor = None
         
-        # 데이터베이스 설정
+        # Supabase PostgreSQL 데이터베이스 설정
         self.DB_CONFIG = {
-            "host": os.getenv("DB_HOST", "localhost"),
-            "port": int(os.getenv("DB_PORT", "3306")),
-            "user": os.getenv("DB_USER", "root"),
-            "password": os.getenv("DB_PASSWORD", ""),
-            "database": os.getenv("DB_NAME", "bookdb"),
-            "auth_plugin": os.getenv("DB_AUTH_PLUGIN", "mysql_native_password"),
-            "charset": "utf8mb4",
-            "collation": "utf8mb4_unicode_ci",
-            "autocommit": False,
-            "pool_name": "bookdb_pool",
-            "pool_size": int(os.getenv("DB_POOL_SIZE", "10")),
-            "pool_reset_session": True
+            "host": os.getenv("SUPABASE_DB_HOST", "db.your-project-ref.supabase.co"),
+            "port": int(os.getenv("SUPABASE_DB_PORT", "6543")),
+            "user": os.getenv("SUPABASE_DB_USER", "postgres"),
+            "password": os.getenv("SUPABASE_DB_PASSWORD", ""),
+            "database": os.getenv("SUPABASE_DB_NAME", "postgres"),
+            "sslmode": os.getenv("SUPABASE_DB_SSLMODE", "require"),
+            "connect_timeout": 10,
+            "application_name": "book-recommender-api"
         }
         
         if use_pool:
@@ -65,10 +62,14 @@ class MySQLDatabase:
     def _initialize_pool(self):
         """연결 풀 초기화"""
         try:
-            self.pool = mysql.connector.pooling.MySQLConnectionPool(**self.DB_CONFIG)
-            logger.info("✅ MySQL 연결 풀 초기화 성공!")
-        except mysql.connector.Error as err:
-            logger.error(f"❌ MySQL 연결 풀 초기화 실패: {err}")
+            self.pool = psycopg2.pool.ThreadedConnectionPool(
+                minconn=1,
+                maxconn=int(os.getenv("DB_POOL_SIZE", "10")),
+                **self.DB_CONFIG
+            )
+            logger.info("✅ PostgreSQL 연결 풀 초기화 성공!")
+        except psycopg2.Error as err:
+            logger.error(f"❌ PostgreSQL 연결 풀 초기화 실패: {err}")
             self.pool = None
             # 폴백: 일반 연결 사용
             self._initialize_connection()
@@ -76,14 +77,11 @@ class MySQLDatabase:
     def _initialize_connection(self):
         """일반 연결 초기화"""
         try:
-            # 풀 설정 제거
-            config = {k: v for k, v in self.DB_CONFIG.items() 
-                     if not k.startswith('pool_')}
-            self.conn = mysql.connector.connect(**config)
-            self.cursor = self.conn.cursor()
-            logger.info("✅ MySQL 연결 성공!")
-        except mysql.connector.Error as err:
-            logger.error(f"❌ MySQL 연결 실패: {err}")
+            self.conn = psycopg2.connect(**self.DB_CONFIG)
+            self.cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+            logger.info("✅ PostgreSQL 연결 성공!")
+        except psycopg2.Error as err:
+            logger.error(f"❌ PostgreSQL 연결 실패: {err}")
             self.conn = None
             self.cursor = None
     
@@ -91,13 +89,13 @@ class MySQLDatabase:
     def get_connection(self):
         """데이터베이스 연결 컨텍스트 매니저"""
         if self.use_pool and self.pool:
-            conn = self.pool.get_connection()
+            conn = self.pool.getconn()
             try:
                 yield conn
             finally:
-                conn.close()
+                self.pool.putconn(conn)
         else:
-            if not self.conn or not self.conn.is_connected():
+            if not self.conn or self.conn.closed:
                 self._initialize_connection()
             yield self.conn
     
@@ -106,12 +104,12 @@ class MySQLDatabase:
         if self.use_pool:
             return  # 풀 사용 시 자동 관리
         
-        if self.conn is None or not self.conn.is_connected():
+        if self.conn is None or self.conn.closed:
             try:
                 self._initialize_connection()
-                logger.info("🔄 MySQL 재연결 성공!")
-            except mysql.connector.Error as err:
-                logger.error(f"❌ MySQL 재연결 실패: {err}")
+                logger.info("🔄 PostgreSQL 재연결 성공!")
+            except psycopg2.Error as err:
+                logger.error(f"❌ PostgreSQL 재연결 실패: {err}")
                 self.conn = None
                 self.cursor = None
     
@@ -131,7 +129,7 @@ class MySQLDatabase:
         try:
             if self.use_pool and self.pool:
                 with self.get_connection() as conn:
-                    with conn.cursor() as cursor:
+                    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                         cursor.execute(query, params or ())
                         result = cursor.fetchall()
                         conn.commit()
@@ -150,9 +148,9 @@ class MySQLDatabase:
             
             return result
             
-        except mysql.connector.Error as err:
+        except psycopg2.Error as err:
             logger.error(f"❌ 데이터 조회 실패: {err}")
-            if self.conn and self.conn.is_connected():
+            if self.conn and not self.conn.closed:
                 self.conn.rollback()
             return []
         except Exception as e:
@@ -192,9 +190,9 @@ class MySQLDatabase:
             
             return True
             
-        except mysql.connector.Error as err:
+        except psycopg2.Error as err:
             logger.error(f"❌ 쿼리 실행 실패: {err}")
-            if self.conn and self.conn.is_connected():
+            if self.conn and not self.conn.closed:
                 self.conn.rollback()
             return False
         except Exception as e:
@@ -234,9 +232,9 @@ class MySQLDatabase:
             
             return True
             
-        except mysql.connector.Error as err:
+        except psycopg2.Error as err:
             logger.error(f"❌ 일괄 쿼리 실행 실패: {err}")
-            if self.conn and self.conn.is_connected():
+            if self.conn and not self.conn.closed:
                 self.conn.rollback()
             return False
         except Exception as e:
@@ -370,8 +368,8 @@ class MySQLDatabase:
                 ADD COLUMN similarity_score DECIMAL(5,4) DEFAULT NULL
             """
             return self.execute_query(query)
-        except mysql.connector.Error as err:
-            if "Duplicate column name" in str(err):
+        except psycopg2.Error as err:
+            if "already exists" in str(err):
                 logger.info("ℹ️ similarity_score 컬럼이 이미 존재합니다.")
                 return True
             else:
@@ -391,8 +389,8 @@ class MySQLDatabase:
                 ADD COLUMN method VARCHAR(50) DEFAULT NULL
             """
             return self.execute_query(query)
-        except mysql.connector.Error as err:
-            if "Duplicate column name" in str(err):
+        except psycopg2.Error as err:
+            if "already exists" in str(err):
                 logger.info("ℹ️ method 컬럼이 이미 존재합니다.")
                 return True
             else:
@@ -412,7 +410,7 @@ class MySQLDatabase:
             "host": self.DB_CONFIG["host"],
             "port": self.DB_CONFIG["port"],
             "database": self.DB_CONFIG["database"],
-            "connected": self.conn.is_connected() if self.conn else False
+            "connected": not self.conn.closed if self.conn else False
         }
     
     def close(self):

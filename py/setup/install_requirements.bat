@@ -9,7 +9,7 @@ python --version
 echo.
 
 echo 📦 가상환경 활성화 중...
-call venv39\Scripts\activate.bat
+call ..\venv_new\Scripts\activate.bat
 echo.
 
 echo 📥 requirements.txt에서 모듈 설치 중...

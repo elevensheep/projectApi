@@ -9,7 +9,7 @@ python --version
 Write-Host ""
 
 Write-Host "📦 가상환경 활성화 중..." -ForegroundColor Yellow
-& ".\venv39\Scripts\Activate.ps1"
+& "..\venv_new\Scripts\Activate.ps1"
 Write-Host ""
 
 Write-Host "📥 requirements.txt에서 모듈 설치 중..." -ForegroundColor Yellow

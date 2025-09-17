@@ -14,10 +14,9 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Query, Path, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-import mysql.connector
 
 # 상대 경로로 import 수정
-from services.database import MySQLDatabase
+from services.database import PostgreSQLDatabase
 from services.nlp import Nlp
 
 # 로거 설정
@@ -82,7 +81,7 @@ def set_cached_data(cache_key: str, data: Dict[str, Any]):
 # 데이터베이스 의존성
 def get_database():
     """데이터베이스 연결 의존성"""
-    db = MySQLDatabase()
+    db = PostgreSQLDatabase()
     try:
         yield db
     finally:
@@ -105,7 +104,7 @@ async def get_recommendations(
     date: Optional[str] = Query(None, alias="news_date", description="뉴스 날짜 (YYYY-MM-DD)"),
     page: int = Query(1, gt=0, le=1000, description="페이지 번호"),
     limit: int = Query(10, gt=0, le=100, description="페이지당 항목 수"),
-    db: MySQLDatabase = Depends(get_database)
+    db: PostgreSQLDatabase = Depends(get_database)
 ):
     """
     카테고리별 도서 추천 API

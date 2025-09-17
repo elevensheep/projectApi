@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from services.nlp import Nlp
 from collections import Counter
-from services.database import MySQLDatabase
+from services.database import PostgreSQLDatabase
 
 class Crowling:
     

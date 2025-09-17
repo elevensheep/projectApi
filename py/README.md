@@ -13,7 +13,7 @@
 ## 📋 요구사항
 
 - Python 3.9+
-- MySQL 8.0+
+- Supabase PostgreSQL 데이터베이스
 - 8GB+ RAM (BERT 모델용)
 
 ## 🛠️ 설치 및 실행
@@ -39,19 +39,19 @@ pip install -r requirements.txt
 `.env` 파일을 생성하고 다음 내용을 추가:
 
 ```env
+# Supabase PostgreSQL 데이터베이스 설정
+# Transaction Pooler 설정 (Supabase의 Transaction pooler 사용)
+SUPABASE_DB_HOST=db.your-project-ref.supabase.co
+SUPABASE_DB_PORT=6543
+SUPABASE_DB_NAME=postgres
+SUPABASE_DB_USER=postgres
+SUPABASE_DB_PASSWORD=your-password-here
+SUPABASE_DB_SSLMODE=require
+
 # 애플리케이션 설정
 DEBUG=False
 APP_NAME="News-Book Recommender API"
 APP_VERSION="2.0.0"
-
-# 데이터베이스 설정
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=bookdb
-DB_USER=root
-DB_PASSWORD=your_password
-DB_AUTH_PLUGIN=mysql_native_password
-DB_POOL_SIZE=10
 
 # 추천 시스템 설정
 ENABLE_BERT=True
@@ -60,15 +60,17 @@ CACHE_TTL=3600
 # 서버 설정
 HOST=0.0.0.0
 PORT=8000
+
+# 성능 설정
+DB_POOL_SIZE=10
 ```
 
-### 3. 데이터베이스 설정
+### 3. Supabase 데이터베이스 설정
 
-MySQL에서 데이터베이스 생성:
-
-```sql
-CREATE DATABASE bookdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+1. [Supabase](https://supabase.com)에서 새 프로젝트 생성
+2. 프로젝트 설정에서 Database > Connection string 확인
+3. Transaction pooler 포트 (6543) 사용
+4. 환경변수에 실제 연결 정보 입력
 
 ### 4. 서버 실행
 

@@ -23,7 +23,7 @@ except ImportError:
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import pandas as pd
-from services.database import MySQLDatabase
+from services.database import PostgreSQLDatabase
 from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
@@ -42,7 +42,7 @@ class Nlp:
         self.fasttext_path = "fasttext.model"
         self.model = None
         self.fasttext_model = None
-        self.db = MySQLDatabase()
+        self.db = PostgreSQLDatabase()
         
         # 기존 모델이 존재하면 로드
         if os.path.exists(self.model_path):

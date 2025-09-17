@@ -7,11 +7,11 @@
 
 import time
 from datetime import datetime, date
-from .database import MySQLDatabase
+from .database import PostgreSQLDatabase
 
 class DuplicateDataChecker:
     def __init__(self):
-        self.db = MySQLDatabase()
+        self.db = PostgreSQLDatabase()
         self.today = datetime.now().strftime("%Y-%m-%d")
     
     def check_today_data_exists(self) -> dict:

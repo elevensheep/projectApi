@@ -20,13 +20,13 @@ class Settings:
     APP_VERSION: str = os.getenv("APP_VERSION", "2.0.0")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
-    # 데이터베이스 설정
-    DB_HOST: str = os.getenv("DB_HOST", "localhost")
-    DB_PORT: int = int(os.getenv("DB_PORT", "3306"))
-    DB_NAME: str = os.getenv("DB_NAME", "bookdb")
-    DB_USER: str = os.getenv("DB_USER", "root")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
-    DB_AUTH_PLUGIN: str = os.getenv("DB_AUTH_PLUGIN", "mysql_native_password")
+    # Supabase PostgreSQL 데이터베이스 설정
+    DB_HOST: str = os.getenv("SUPABASE_DB_HOST", "db.your-project-ref.supabase.co")
+    DB_PORT: int = int(os.getenv("SUPABASE_DB_PORT", "6543"))  # Transaction pooler 포트
+    DB_NAME: str = os.getenv("SUPABASE_DB_NAME", "postgres")
+    DB_USER: str = os.getenv("SUPABASE_DB_USER", "postgres")
+    DB_PASSWORD: str = os.getenv("SUPABASE_DB_PASSWORD", "")
+    DB_SSLMODE: str = os.getenv("SUPABASE_DB_SSLMODE", "require")
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
     
     # 추천 시스템 설정
@@ -55,25 +55,21 @@ class Settings:
     
     @classmethod
     def get_database_url(cls) -> str:
-        """데이터베이스 URL 생성"""
-        return f"mysql://{cls.DB_USER}:{cls.DB_PASSWORD}@{cls.DB_HOST}:{cls.DB_PORT}/{cls.DB_NAME}"
+        """데이터베이스 URL 생성 (PostgreSQL)"""
+        return f"postgresql://{cls.DB_USER}:{cls.DB_PASSWORD}@{cls.DB_HOST}:{cls.DB_PORT}/{cls.DB_NAME}?sslmode={cls.DB_SSLMODE}"
     
     @classmethod
     def get_database_config(cls) -> dict:
-        """데이터베이스 설정 딕셔너리 반환"""
+        """데이터베이스 설정 딕셔너리 반환 (PostgreSQL)"""
         return {
             "host": cls.DB_HOST,
             "port": cls.DB_PORT,
             "user": cls.DB_USER,
             "password": cls.DB_PASSWORD,
             "database": cls.DB_NAME,
-            "auth_plugin": cls.DB_AUTH_PLUGIN,
-            "charset": "utf8mb4",
-            "collation": "utf8mb4_unicode_ci",
-            "autocommit": False,
-            "pool_name": "bookdb_pool",
-            "pool_size": cls.DB_POOL_SIZE,
-            "pool_reset_session": True
+            "sslmode": cls.DB_SSLMODE,
+            "connect_timeout": 10,
+            "application_name": "book-recommender-api"
         }
 
 # 전역 설정 인스턴스

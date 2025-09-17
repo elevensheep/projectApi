@@ -1,5 +1,5 @@
 from services.crowling import Crowling
-from services.database import MySQLDatabase
+from services.database import PostgreSQLDatabase
 from services.nlp import Nlp
 from datetime import datetime
 import numpy as np
@@ -8,7 +8,7 @@ from collections import defaultdict
 
 def recommend_books_by_keywords_enhanced(news_data: dict):
     """향상된 키워드 기반 도서 추천"""
-    db = MySQLDatabase()
+    db = PostgreSQLDatabase()
     nlp = Nlp()
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -212,7 +212,7 @@ def combine_matches(direct_matches, similarity_matches, cluster_matches):
 
 def evaluate_recommendation_quality():
     """추천 품질 평가"""
-    db = MySQLDatabase()
+    db = PostgreSQLDatabase()
     
     # 최근 추천 결과 분석
     query = """
