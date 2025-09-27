@@ -18,8 +18,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI
 from api.endpoints import router
 from fastapi.middleware.cors import CORSMiddleware
-from services.crowling import Crowling
-from utils.recommendation_runner import recommend_books_by_keywords
+from core.crowling import Crowling
 
 app = FastAPI(title="News-Book Recommender API")
 
@@ -42,7 +41,7 @@ async def startup_event():
     print("🚀 서버 시작과 함께 추천 시스템 실행 중...")
     try:
         # 중복 데이터 체크
-        from services.duplicate_checker import DuplicateDataChecker
+        from utils.duplicate_checker import DuplicateDataChecker
         
         checker = DuplicateDataChecker()
         should_skip = checker.should_skip_processing()

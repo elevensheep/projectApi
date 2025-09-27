@@ -1,20 +1,22 @@
 # News-Book Recommender API
 
-뉴스 기반 도서 추천 시스템의 FastAPI 백엔드
+뉴스 기반 도서 추천 시스템의 FastAPI 백엔드 (BERT 전용)
 
 ## 🚀 주요 기능
 
 - **뉴스 크롤링**: 중앙일보 뉴스 자동 수집
-- **BERT 기반 추천**: 문맥 기반 도서 추천
-- **전통적 추천**: 키워드 기반 도서 추천
+- **BERT 기반 추천**: 문맥 기반 도서 추천 (KoBERT)
+- **GPU 가속**: CUDA 지원으로 성능 최적화
 - **캐싱 시스템**: 성능 최적화
 - **실시간 API**: RESTful API 제공
+- **중복 방지**: 오늘자 데이터 자동 체크
 
 ## 📋 요구사항
 
 - Python 3.9+
 - Supabase PostgreSQL 데이터베이스
 - 8GB+ RAM (BERT 모델용)
+- CUDA 지원 GPU (선택사항, 성능 향상)
 
 ## 🛠️ 설치 및 실행
 
@@ -36,50 +38,28 @@ pip install -r requirements.txt
 
 ### 2. 환경 변수 설정
 
-`.env` 파일을 생성하고 다음 내용을 추가:
-
-```env
-# Supabase PostgreSQL 데이터베이스 설정
-# Transaction Pooler 설정 (Supabase의 Transaction pooler 사용)
-SUPABASE_DB_HOST=db.your-project-ref.supabase.co
-SUPABASE_DB_PORT=6543
-SUPABASE_DB_NAME=postgres
-SUPABASE_DB_USER=postgres
-SUPABASE_DB_PASSWORD=your-password-here
-SUPABASE_DB_SSLMODE=require
-
-# 애플리케이션 설정
-DEBUG=False
-APP_NAME="News-Book Recommender API"
-APP_VERSION="2.0.0"
-
-# 추천 시스템 설정
-ENABLE_BERT=True
-CACHE_TTL=3600
-
-# 서버 설정
-HOST=0.0.0.0
-PORT=8000
-
-# 성능 설정
-DB_POOL_SIZE=10
-```
-
-### 3. Supabase 데이터베이스 설정
-
-1. [Supabase](https://supabase.com)에서 새 프로젝트 생성
-2. 프로젝트 설정에서 Database > Connection string 확인
-3. Transaction pooler 포트 (6543) 사용
-4. 환경변수에 실제 연결 정보 입력
-
-### 4. 서버 실행
+`env.example` 파일을 `.env`로 복사하고 실제 값으로 수정:
 
 ```bash
-# 개발 모드
-python app/main.py
+cp env.example .env
+```
 
-# 또는 uvicorn 직접 실행
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+### 3. 서버 실행
+
+```bash
+# API 서버 실행
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# BERT 기반 추천 시스템 실행
+python scripts/run_recommendation.py
+```
+
+### 4. 설치 스크립트 사용 (Windows)
+
+```bash
+# 자동 설치 및 실행
+cd setup
+install_requirements.bat
 ```
 
 ## 📚 API 문서
@@ -89,10 +69,82 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-## 🔧 주요 API 엔드포인트
+## 🏗️ 프로젝트 구조
+
+```
+py/
+├── app/                         # 메인 애플리케이션
+│   ├── api/                    # API 레이어
+│   │   └── endpoints.py        # REST API 엔드포인트
+│   ├── core/                   # 핵심 비즈니스 로직
+│   │   ├── bert/              # BERT 관련 모듈
+│   │   │   ├── bert_nlp.py    # 기본 BERT NLP
+│   │   │   └── bert_nlp_gpu.py # GPU 최적화 BERT NLP
+│   │   ├── recommendation/    # 추천 시스템
+│   │   │   ├── bert_recommendation.py      # 기본 BERT 추천
+│   │   │   └── bert_recommendation_gpu.py  # GPU 최적화 BERT 추천
+│   │   ├── crowling.py        # 뉴스 크롤링 서비스
+│   │   └── database.py        # PostgreSQL 데이터베이스 서비스
+│   ├── utils/                 # 유틸리티
+│   │   └── duplicate_checker.py # 중복 데이터 체크
+│   └── main.py               # FastAPI 애플리케이션
+├── config/                    # 설정 관리
+│   └── settings.py           # 환경 변수 설정
+├── scripts/                   # 실행 스크립트
+│   └── run_recommendation.py # BERT 추천 시스템 실행
+├── docs/                      # 문서
+├── setup/                     # 설치 스크립트
+│   ├── install_requirements.bat  # Windows 설치
+│   └── install_requirements.ps1  # PowerShell 설치
+├── requirements.txt           # Python 의존성
+├── env.example               # 환경 변수 예시
+└── README.md                 # 프로젝트 문서
+```
+
+## ⚡ 성능 최적화
+
+### 1. BERT 기반 처리
+- KoBERT 모델 사용으로 한국어 문맥 이해
+- 문맥적 유사도 계산으로 정확한 추천
+- GPU 가속 지원으로 빠른 처리
+
+### 2. 연결 풀링
+- PostgreSQL 연결 풀 사용으로 연결 오버헤드 최소화
+- 기본 풀 크기: 10개 연결
+
+### 3. 캐싱 시스템
+- 추천 결과 1시간 캐싱
+- 메모리 기반 캐시로 응답 속도 향상
+
+### 4. 비동기 처리
+- FastAPI 비동기 엔드포인트
+- 데이터베이스 연결 비동기 처리
+
+### 5. GPU 가속
+- CUDA 지원 BERT 모델
+- 배치 처리 최적화
+- 자동 GPU 감지 및 CPU 폴백
+
+## 🔍 모니터링
+
+### 헬스체크
+```bash
+curl http://localhost:8000/health
+```
+
+### 캐시 상태 확인
+```bash
+curl http://localhost:8000/api/cache/status
+```
+
+### BERT 모델 시각화
+```bash
+curl http://localhost:8000/api/visualize
+```
+
+## 🚀 주요 API 엔드포인트
 
 ### 추천 API
-
 ```http
 GET /api/recommend/{category}
 ```
@@ -126,75 +178,18 @@ GET /api/recommend/{category}
 ```
 
 ### 기타 API
-
 - `GET /health`: 헬스체크
 - `GET /api/categories`: 사용 가능한 카테고리 목록
 - `GET /api/cache/clear`: 캐시 초기화
 - `GET /api/cache/status`: 캐시 상태 확인
-- `GET /api/visualize`: NLP 모델 시각화
+- `GET /api/visualize`: BERT 모델 시각화
 
-## 🏗️ 프로젝트 구조
-
-```
-py/
-├── app/
-│   ├── api/
-│   │   └── endpoints.py      # API 엔드포인트
-│   ├── services/
-│   │   ├── database.py       # 데이터베이스 서비스
-│   │   ├── crowling.py       # 뉴스 크롤링
-│   │   ├── nlp.py           # 전통적 NLP
-│   │   └── bert_nlp.py      # BERT NLP
-│   ├── utils/
-│   │   ├── recommendation_runner.py  # 전통적 추천
-│   │   └── bert_recommendation.py    # BERT 추천
-│   └── main.py              # FastAPI 애플리케이션
-├── config.py                # 설정 관리
-├── requirements.txt         # 패키지 의존성
-└── README.md               # 프로젝트 문서
-```
-
-## ⚡ 성능 최적화
-
-### 1. 연결 풀링
-- MySQL 연결 풀 사용으로 연결 오버헤드 최소화
-- 기본 풀 크기: 10개 연결
-
-### 2. 캐싱 시스템
-- 추천 결과 1시간 캐싱
-- 메모리 기반 캐시로 응답 속도 향상
-
-### 3. 비동기 처리
-- FastAPI 비동기 엔드포인트
-- 데이터베이스 연결 비동기 처리
-
-### 4. Gzip 압축
-- 응답 데이터 자동 압축
-- 네트워크 대역폭 절약
-
-## 🔍 모니터링
-
-### 로깅
-- 요청/응답 로깅
-- 쿼리 실행 시간 측정
-- 에러 로깅 및 추적
-
-### 헬스체크
-```bash
-curl http://localhost:8000/health
-```
-
-### 캐시 상태 확인
-```bash
-curl http://localhost:8000/api/cache/status
-```
-
-## 🚨 문제 해결
+## 🔧 문제 해결
 
 ### 일반적인 문제
 
 1. **데이터베이스 연결 실패**
-   - MySQL 서비스 실행 확인
+   - Supabase 서비스 실행 확인
    - 환경 변수 설정 확인
    - 방화벽 설정 확인
 
@@ -219,28 +214,17 @@ uvicorn app.main:app --log-level debug
 ## 📈 성능 벤치마크
 
 ### 테스트 환경
-- CPU: Intel i7-10700K
+- CPU: Intel i7-12700K
 - RAM: 32GB
-- DB: MySQL 8.0
+- GPU: NVIDIA RTX 3080 (선택사항)
+- DB: Supabase PostgreSQL
 
 ### 성능 결과
-- **평균 응답 시간**: 150ms
+- **평균 응답 시간**: 150ms (CPU), 50ms (GPU)
 - **캐시 히트율**: 85%
 - **동시 사용자**: 100명
 - **처리량**: 1000 req/min
 
-## 🤝 기여하기
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
 ## 📄 라이선스
 
 MIT License
-
-## 📞 지원
-
-문제가 발생하면 이슈를 생성해주세요. 

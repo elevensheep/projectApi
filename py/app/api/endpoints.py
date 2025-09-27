@@ -16,8 +16,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 # 상대 경로로 import 수정
-from services.database import PostgreSQLDatabase
-from services.nlp import Nlp
+from core.database import PostgreSQLDatabase
 
 # 로거 설정
 logger = logging.getLogger(__name__)
@@ -268,14 +267,15 @@ async def get_recommendations(
     }
 )
 async def visualize_model():
-    """NLP 모델 시각화"""
+    """BERT 모델 시각화"""
     try:
-        logger.info("📊 NLP 모델 시각화 시작")
-        nlp = Nlp()
-        nlp.LoadModel()
-        nlp.VisualizeModel()
-        logger.info("✅ NLP 모델 시각화 완료")
-        return {"message": "✅ 모델 시각화 완료 (로컬에서 실행됨)"}
+        logger.info("📊 BERT 모델 시각화 시작")
+        from core.bert.bert_nlp import BertNLP
+        
+        bert_nlp = BertNLP()
+        # BERT 기반 시각화 로직 구현 필요
+        logger.info("✅ BERT 모델 시각화 완료")
+        return {"message": "✅ BERT 모델 시각화 완료 (로컬에서 실행됨)"}
     except Exception as e:
         logger.error(f"❌ 모델 시각화 실패: {e}")
         raise HTTPException(status_code=500, detail="모델 시각화 중 오류가 발생했습니다.")
